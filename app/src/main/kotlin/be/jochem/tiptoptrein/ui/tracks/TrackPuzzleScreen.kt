@@ -1,5 +1,7 @@
 package be.jochem.tiptoptrein.ui.tracks
 
+import kotlinx.coroutines.withContext
+import be.jochem.tiptoptrein.ui.common.GameMotion
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -181,10 +183,10 @@ fun TrackPuzzleScreen(onHome: () -> Unit) {
     if (!solved) return@LaunchedEffect
     TrainSounds.play(kind.sound)
     val total = steps.size + 2f
-    progress.animateTo(total, tween((total * 550).toInt(), easing = LinearEasing))
+    withContext(GameMotion) { progress.animateTo(total, tween((total * 550).toInt(), easing = LinearEasing)) }
     stars++
     TrainSounds.play(Sfx.CORRECT)
-    TrainSounds.say("Goed zo! De trein is er!")
+    TrainSounds.say("Joepie! De trein is er!")
     delay(2500)
     level++
     kind = TrainKind.entries.random()

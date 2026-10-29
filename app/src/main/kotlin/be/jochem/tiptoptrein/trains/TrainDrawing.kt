@@ -47,8 +47,9 @@ private val containerColors = listOf(
  * @param railY y of the top of the rail in px.
  * @param turn wheel rotation in radians.
  * @param time running time in seconds, used for smoke.
- * @param carColors optional body colors per wagon, overriding the kind's own colors.
+ * @param carColors optional body colors per wagon (null keeps that wagon's own colors).
  * @param liftCar index of a wagon to draw raised slightly (used when counting).
+ * @param carKinds optional style per wagon, so a train can mix wagons of different trains.
  */
 fun DrawScope.drawTrain(
   kind: TrainKind,
@@ -58,21 +59,26 @@ fun DrawScope.drawTrain(
   cars: Int = kind.cars,
   turn: Float = 0f,
   time: Float = 0f,
-  carColors: List<Color>? = null,
+  carColors: List<Color?>? = null,
   liftCar: Int = -1,
+  carKinds: List<TrainKind>? = null,
 ) {
   for (i in 0 until cars) {
     val x = left + i * (CAR_GAP + CAR_LEN) * u
     val lift = if (i == liftCar) -1.6f * u else 0f
     // coupler to the next vehicle
     drawLine(Ink, Offset(x + CAR_LEN * u, railY - 2.4f * u), Offset(x + (CAR_LEN + CAR_GAP) * u, railY - 2.4f * u), 0.4f * u)
-    drawCar(kind, i, x, railY + lift, u, turn, carColors?.getOrNull(i))
+    drawCar(carKinds?.getOrNull(i) ?: kind, i, x, railY + lift, u, turn, carColors?.getOrNull(i))
   }
   val lx = left + cars * (CAR_GAP + CAR_LEN) * u
   drawLoco(kind, lx, railY, u, turn, time)
 }
 
 // ---- wagons ------------------------------------------------------------------------------
+
+/** Draws one wagon of [kind] on its own, e.g. as a button in the train builder. */
+fun DrawScope.drawWagon(kind: TrainKind, left: Float, railY: Float, u: Float, color: Color? = null) =
+  drawCar(kind, 0, left, railY, u, 0f, color)
 
 private fun DrawScope.drawCar(kind: TrainKind, index: Int, x: Float, railY: Float, u: Float, turn: Float, override: Color?) {
   when (kind) {
@@ -180,6 +186,7 @@ private fun DrawScope.drawLoco(kind: TrainKind, x: Float, railY: Float, u: Float
     TrainKind.STEAM -> steamLoco(x, railY, u, turn, time)
     TrainKind.FREIGHT -> dieselLoco(x, railY, u, turn, time)
     TrainKind.TRAM -> tramFront(x, railY, u, turn)
+    TrainKind.INTERCITY -> nmbsLocomotive(x, railY, u, turn)
     else -> electricLoco(kind, x, railY, u, turn)
   }
 }
@@ -283,6 +290,61 @@ private fun DrawScope.tramFront(x: Float, railY: Float, u: Float, turn: Float) {
   drawCircle(Color(0xFFFFEB3B), 0.45f * u, Offset(x + (len - 0.7f) * u, top + 5.6f * u))
 }
 
+/**
+ * The IC-trein is pulled by a real locomotive (like the NMBS HLE 18): a boxy machine with a cab and
+ * yellow front at both ends, grilles instead of passenger windows, and two pantographs.
+ */
+private fun DrawScope.nmbsLocomotive(x: Float, railY: Float, u: Float, turn: Float) {
+  val len = locoLength(TrainKind.INTERCITY)
+  val h = 7.6f * u
+  val top = railY - 1.8f * u - h
+  val bottom = top + h
+  bogies(x, railY, u, len, turn)
+  pantograph(x + 3f * u, top, u)
+  pantograph(x + len * u - 6f * u, top, u)
+  val body = Path().apply {
+    moveTo(x + 2.2f * u, top)
+    lineTo(x + (len - 2.2f) * u, top)
+    lineTo(x + len * u, top + 3.2f * u)
+    lineTo(x + len * u, bottom)
+    lineTo(x, bottom)
+    lineTo(x, top + 3.2f * u)
+    close()
+  }
+  drawPath(body, NmbsWhite)
+  drawPath(body, NmbsWhite.darker(0.25f), style = Stroke(0.25f * u))
+  // yellow cab fronts at both ends
+  for (front in listOf(true, false)) {
+    val edge = if (front) x + len * u else x
+    val dir = if (front) -1f else 1f
+    val yellow = Path().apply {
+      moveTo(edge, top + 3.2f * u)
+      lineTo(edge, bottom)
+      lineTo(edge + dir * 2.6f * u, bottom)
+      lineTo(edge + dir * 2.6f * u, top + 3.6f * u)
+      close()
+    }
+    drawPath(yellow, NmbsYellow)
+    val windscreen = Path().apply {
+      moveTo(edge + dir * 2f * u, top + 0.5f * u)
+      lineTo(edge + dir * 0.4f * u, top + 2.9f * u)
+      lineTo(edge + dir * 2.4f * u, top + 2.9f * u)
+      close()
+    }
+    drawPath(windscreen, Glass)
+    // small cab side window
+    drawRoundRect(Glass, Offset(if (front) edge - 4.4f * u else edge + 3f * u, top + 1.2f * u), Size(1.4f * u, 1.8f * u), CornerRadius(0.3f * u))
+    drawCircle(Color(0xFFFFF9C4), 0.4f * u, Offset(edge + dir * 0.8f * u, bottom - 2.2f * u))
+  }
+  // engine-room grilles along the side
+  for (k in 0..2) {
+    val gx = x + (5.2f + k * 2.1f) * u
+    drawRoundRect(Color(0xFFB0BEC5), Offset(gx, top + 1.2f * u), Size(1.7f * u, 3f * u), CornerRadius(0.2f * u))
+    for (l in 1..3) drawLine(Color(0xFF78909C), Offset(gx + l * 0.42f * u, top + 1.4f * u), Offset(gx + l * 0.42f * u, top + 4f * u), 0.12f * u)
+  }
+  drawRect(NmbsBand, Offset(x + 2.6f * u, bottom - 1.8f * u), Size((len - 5.2f) * u, 1.3f * u))
+}
+
 private fun DrawScope.electricLoco(kind: TrainKind, x: Float, railY: Float, u: Float, turn: Float) {
   val s = electricStyle(kind)
   val len = locoLength(kind)
@@ -294,6 +356,7 @@ private fun DrawScope.electricLoco(kind: TrainKind, x: Float, railY: Float, u: F
 
   val noseStart = when (kind) {
     TrainKind.SHINKANSEN -> 11f
+    TrainKind.SPRINTER -> 11.5f
     TrainKind.HIGH_SPEED, TrainKind.ICE, TrainKind.TGV, TrainKind.MAGLEV -> 12f
     TrainKind.METRO -> 14.6f
     else -> 12.6f
@@ -302,6 +365,11 @@ private fun DrawScope.electricLoco(kind: TrainKind, x: Float, railY: Float, u: F
     moveTo(x + s.corner * u, top)
     lineTo(x + noseStart * u, top)
     when (kind) {
+      TrainKind.SPRINTER -> {
+        // the Desiro's round nose
+        cubicTo(x + (len - 1.2f) * u, top, x + (len + 0.6f) * u, top + 2.4f * u, x + len * u, top + 5f * u)
+        lineTo(x + len * u, bottom)
+      }
       TrainKind.SHINKANSEN -> {
         // long flat "duck bill" nose
         cubicTo(x + 16f * u, top, x + (len - 6f) * u, bottom - 3.4f * u, x + len * u, bottom - 1.6f * u)
@@ -363,6 +431,12 @@ private fun DrawScope.electricLoco(kind: TrainKind, x: Float, railY: Float, u: F
         moveTo(x + (len - 8.5f) * u, top + 0.5f * u)
         quadraticTo(x + (len - 4.5f) * u, top + 0.6f * u, x + (len - 2.4f) * u, top + 3f * u)
         lineTo(x + (len - 7f) * u, top + 3f * u)
+        close()
+      }
+      TrainKind.SPRINTER -> {
+        moveTo(x + 11.6f * u, top + 0.5f * u)
+        cubicTo(x + (len - 1.6f) * u, top + 0.5f * u, x + (len - 0.1f) * u, top + 2f * u, x + (len - 0.15f) * u, top + 4.6f * u)
+        lineTo(x + 11.6f * u, top + 4.6f * u)
         close()
       }
       TrainKind.METRO -> {

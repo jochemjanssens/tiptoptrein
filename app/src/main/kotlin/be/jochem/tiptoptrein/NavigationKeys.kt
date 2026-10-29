@@ -20,3 +20,7 @@ import kotlinx.serialization.Serializable
 @Serializable data object TrackPuzzle : NavKey
 
 @Serializable data object Race : NavKey
+
+@Serializable data object PhotoPuzzle : NavKey
+
+@Serializable data object TrainBuilder : NavKey

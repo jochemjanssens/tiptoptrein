@@ -19,3 +19,4 @@ signing/
 *.jks
 *.keystore
 .kotlin/
+release/

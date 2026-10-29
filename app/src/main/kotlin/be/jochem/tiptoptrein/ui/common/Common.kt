@@ -1,5 +1,6 @@
 package be.jochem.tiptoptrein.ui.common
 
+import androidx.compose.ui.MotionDurationScale
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -14,7 +15,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -107,10 +113,12 @@ fun GameFrame(
 ) {
   Box(modifier.fillMaxSize()) {
     background()
-    Box(Modifier.fillMaxSize().safeDrawingPadding()) {
+    // The game uses the full width: a camera hole at the side only hides a bit of scenery, while
+    // padding for it would push everything off-centre. Only the header avoids it.
+    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical))) {
       content()
       Row(
-        Modifier.fillMaxWidth().padding(12.dp),
+        Modifier.fillMaxWidth().safeDrawingPadding().padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         EmojiButton("🏠", onClick = {
@@ -149,4 +157,12 @@ fun StarCounter(count: Int, modifier: Modifier = Modifier) {
   ) {
     Text("⭐ $count", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color(0xFF263238))
   }
+}
+
+/**
+ * Game motion (a train driving in, the train on the finished track) is the point of the game, so
+ * it runs at normal speed even when the system's animation scale is turned down or off.
+ */
+val GameMotion: MotionDurationScale = object : MotionDurationScale {
+  override val scaleFactor = 1f
 }

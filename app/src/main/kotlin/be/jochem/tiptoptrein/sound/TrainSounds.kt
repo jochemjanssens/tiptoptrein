@@ -55,11 +55,22 @@ object TrainSounds {
         val flemish = Locale.forLanguageTag("nl-BE")
         val available = tts?.isLanguageAvailable(flemish) ?: TextToSpeech.LANG_NOT_SUPPORTED
         tts?.language = if (available >= TextToSpeech.LANG_COUNTRY_AVAILABLE) flemish else Locale.forLanguageTag("nl-NL")
-        tts?.setSpeechRate(0.9f)
-        tts?.setPitch(1.1f)
+        pickBestVoice()
+        // A bit higher and quicker sounds cheerful and lively, like reading to a child.
+        tts?.setSpeechRate(1.05f)
+        tts?.setPitch(1.3f)
         ttsReady = true
       }
     }
+  }
+
+  /** Of the installed Dutch voices that work offline, use the best one, preferring Flemish. */
+  private fun pickBestVoice() {
+    val engine = tts ?: return
+    val voices = runCatching { engine.voices }.getOrNull().orEmpty()
+      .filter { it.locale.language == "nl" && !it.isNetworkConnectionRequired }
+    val best = voices.maxWithOrNull(compareBy({ it.locale.country == "BE" }, { it.quality })) ?: return
+    engine.voice = best
   }
 
   fun play(sfx: Sfx) {

@@ -10,6 +10,8 @@ import be.jochem.tiptoptrein.ui.drive.DriveScreen
 import be.jochem.tiptoptrein.ui.find.FindTrainScreen
 import be.jochem.tiptoptrein.ui.home.HomeScreen
 import be.jochem.tiptoptrein.ui.memory.MemoryScreen
+import be.jochem.tiptoptrein.ui.builder.TrainBuilderScreen
+import be.jochem.tiptoptrein.ui.puzzle.PhotoPuzzleScreen
 import be.jochem.tiptoptrein.ui.race.RaceScreen
 import be.jochem.tiptoptrein.ui.slideshow.SlideshowScreen
 import be.jochem.tiptoptrein.ui.tracks.TrackPuzzleScreen
@@ -33,6 +35,8 @@ fun MainNavigation() {
         entry<Coloring> { ColoringScreen(onHome = goHome) }
         entry<TrackPuzzle> { TrackPuzzleScreen(onHome = goHome) }
         entry<Race> { RaceScreen(onHome = goHome) }
+        entry<PhotoPuzzle> { PhotoPuzzleScreen(onHome = goHome) }
+        entry<TrainBuilder> { TrainBuilderScreen(onHome = goHome) }
       },
   )
 }

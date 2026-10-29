@@ -1,5 +1,7 @@
 package be.jochem.tiptoptrein.ui.slideshow
 
+import kotlinx.coroutines.withContext
+import be.jochem.tiptoptrein.ui.common.GameMotion
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -42,6 +44,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import be.jochem.tiptoptrein.sound.TrainSounds
@@ -74,6 +77,7 @@ fun SlideshowScreen(onHome: () -> Unit) {
   var shownIndex by remember { mutableIntStateOf(-1) }
 
   LaunchedEffect(index, playing, bigPhoto) {
+    withContext(GameMotion) {
     if (shownIndex != index) {
       photoScale.snapTo(0f)
       position.snapTo(0f)
@@ -81,17 +85,18 @@ fun SlideshowScreen(onHome: () -> Unit) {
       TrainSounds.play(kind.sound)
       launch { photoScale.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = 200f)) }
       delay(500)
-      TrainSounds.say("${kind.title}. ${kind.fact}")
+      TrainSounds.say(intro(index, kind) + kind.fact)
       shownIndex = index
     }
     if (!playing || bigPhoto) {
       if (position.value != 1f) position.animateTo(1f, tween(800))
-      return@LaunchedEffect
+      return@withContext
     }
     delay((4000 + kind.fact.length * 80).toLong())
     launch { photoScale.animateTo(0f, tween(400)) }
     position.animateTo(2f, tween(1800, easing = FastOutLinearInEasing))
     index = (index + 1) % kinds.size
+    }
   }
 
   fun jump(delta: Int) {
@@ -103,7 +108,7 @@ fun SlideshowScreen(onHome: () -> Unit) {
     title = kind.title,
     onHome = onHome,
     actions = {
-      EmojiButton("🔊", onClick = { TrainSounds.say("${kind.title}. ${kind.fact}") }, size = 56.dp)
+      EmojiButton("🔊", onClick = { TrainSounds.say(intro(index, kind) + kind.fact) }, size = 56.dp)
       Spacer(Modifier.width(10.dp))
       EmojiButton(if (playing) "⏸️" else "▶️", onClick = { playing = !playing }, size = 56.dp)
     },
@@ -115,17 +120,26 @@ fun SlideshowScreen(onHome: () -> Unit) {
       val density = LocalDensity.current
       val landscape = maxWidth > maxHeight
       val wide = maxWidth > 700.dp
-      val textHeight = if (landscape) 110.dp else 150.dp
-      val railY = maxHeight - textHeight - 24.dp
-      val trainBand = maxHeight * if (landscape) 0.24f else 0.16f
+      // Phones in landscape are short: put the text beside the photo instead of below it.
+      val compact = landscape && maxHeight < 500.dp
+      val textHeight = when {
+        compact -> 0.dp
+        landscape -> 100.dp
+        else -> 150.dp
+      }
+      val railY = maxHeight - textHeight - if (compact) 10.dp else 20.dp
+      // The photo is the star of the slide; the drawn train gets a small strip above the text.
+      val trainBand = maxHeight * if (landscape) 0.13f else 0.09f
       val trainLenUnits = trainLength(kind, kind.cars)
       val u = min(trainBand.value / 11f, (maxWidth.value - 32f) / (trainLenUnits + 4f))
       val trainTop = railY - (u * 11.5f).dp
-      val photoTop = 84.dp
-      val photoBottom = trainTop - 12.dp
-      // Fit a 3:2 photo frame into the space above the train.
-      val frameH = min((photoBottom - photoTop).value, (maxWidth.value - 160f) / 1.5f).coerceAtLeast(60f)
+      val photoTop = if (compact) 68.dp else 76.dp
+      val photoBottom = trainTop - 4.dp
+      // Fit a 3:2 photo frame into the space above the train (beside the text on phones).
+      val photoMaxW = if (compact) maxWidth.value * 0.5f else maxWidth.value - 190f
+      val frameH = min((photoBottom - photoTop).value, photoMaxW / 1.5f).coerceAtLeast(60f)
       val frameW = frameH * 1.5f
+      val photoX = if (compact) 96.dp else (maxWidth - frameW.dp) / 2
 
       Canvas(
         Modifier.fillMaxSize().pointerInput(kind) {
@@ -146,8 +160,7 @@ fun SlideshowScreen(onHome: () -> Unit) {
       // The real train, as a photo card.
       Box(
         Modifier
-          .align(Alignment.TopCenter)
-          .offset(y = photoTop + ((photoBottom - photoTop).value - frameH).coerceAtLeast(0f).dp / 2)
+          .offset(x = photoX, y = photoTop + ((photoBottom - photoTop).value - frameH).coerceAtLeast(0f).dp / 2)
           .size(frameW.dp, frameH.dp)
           .scale(photoScale.value)
           .rotate(-2f)
@@ -165,19 +178,26 @@ fun SlideshowScreen(onHome: () -> Unit) {
         Credit(kind.photo.credit, Modifier.align(Alignment.BottomEnd))
       }
 
-      Box(
+      val factModifier = if (compact) {
+        Modifier
+          .offset(x = photoX + frameW.dp + 16.dp, y = photoTop)
+          .size(width = maxWidth - photoX - frameW.dp - 16.dp - 96.dp, height = photoBottom - photoTop)
+      } else {
         Modifier
           .align(Alignment.BottomCenter)
           .fillMaxWidth()
           .padding(horizontal = if (landscape) 110.dp else 20.dp, vertical = 12.dp)
+      }
+      Box(
+        factModifier
           .background(Color.White.copy(alpha = 0.92f), RoundedCornerShape(22.dp))
-          .padding(horizontal = 20.dp, vertical = 12.dp),
+          .padding(horizontal = if (compact) 14.dp else 20.dp, vertical = 12.dp),
         contentAlignment = Alignment.Center,
       ) {
         Text(
           kind.fact,
-          fontSize = if (wide) 26.sp else 20.sp,
-          lineHeight = if (wide) 32.sp else 25.sp,
+          fontSize = if (wide && !compact) 26.sp else 19.sp,
+          lineHeight = if (wide && !compact) 32.sp else 24.sp,
           fontWeight = FontWeight.Medium,
           color = Color(0xFF263238),
           textAlign = TextAlign.Center,
@@ -218,10 +238,21 @@ fun SlideshowScreen(onHome: () -> Unit) {
 private fun Credit(text: String, modifier: Modifier = Modifier) {
   Text(
     "$text · Wikimedia Commons",
-    fontSize = 10.sp,
+    fontSize = 9.sp,
+    lineHeight = 11.sp,
+    maxLines = 1,
+    overflow = TextOverflow.Ellipsis,
     color = Color.White,
     modifier = modifier
       .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(topStart = 6.dp))
       .padding(horizontal = 6.dp, vertical = 2.dp),
   )
+}
+
+private val intros = listOf("Kijk eens! ", "Wauw! ", "Hoera! ", "Daar is ")
+
+/** A cheerful opening line before the fact, e.g. "Wauw! De Eurostar!". */
+private fun intro(index: Int, kind: TrainKind): String {
+  val start = intros[index % intros.size]
+  return if (start == "Daar is ") "Daar is de ${kind.title}! " else "${start}De ${kind.title}! "
 }

@@ -92,7 +92,7 @@ fun FindTrainScreen(onHome: () -> Unit) {
       solved = true
       stars++
       TrainSounds.play(Sfx.CORRECT)
-      TrainSounds.say("Ja! Goed zo!")
+      TrainSounds.say("Jaaa! Super goed!")
       scope.launch {
         delay(600)
         TrainSounds.play(kind.sound)

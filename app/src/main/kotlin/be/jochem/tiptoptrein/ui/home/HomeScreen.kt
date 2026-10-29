@@ -13,7 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,9 +38,11 @@ import be.jochem.tiptoptrein.CountWagons
 import be.jochem.tiptoptrein.Drive
 import be.jochem.tiptoptrein.FindTrain
 import be.jochem.tiptoptrein.Memory
+import be.jochem.tiptoptrein.PhotoPuzzle
 import be.jochem.tiptoptrein.Race
 import be.jochem.tiptoptrein.Slideshow
 import be.jochem.tiptoptrein.TrackPuzzle
+import be.jochem.tiptoptrein.TrainBuilder
 import be.jochem.tiptoptrein.sound.TrainSounds
 import be.jochem.tiptoptrein.trains.Scenery
 import be.jochem.tiptoptrein.trains.TrainKind
@@ -55,7 +61,9 @@ private val activities = listOf(
   Activity("🎞️", "Treinen kijken", Color(0xFF42A5F5), Slideshow),
   Activity("⚡", "Supersnel", Color(0xFF26A69A), Race),
   Activity("🚂", "Machinist", Color(0xFFEF5350), Drive),
+  Activity("🔧", "Bouw je trein", Color(0xFF5C6BC0), TrainBuilder),
   Activity("🛤️", "Sporen leggen", Color(0xFF8D6E63), TrackPuzzle),
+  Activity("🧩", "Fotopuzzel", Color(0xFF00ACC1), PhotoPuzzle),
   Activity("🎨", "Kleuren", Color(0xFFEC407A), Coloring),
   Activity("🔢", "Tellen", Color(0xFF66BB6A), CountWagons),
   Activity("🔍", "Zoeken", Color(0xFFAB47BC), FindTrain),
@@ -65,7 +73,7 @@ private val activities = listOf(
 @Composable
 fun HomeScreen(onOpen: (NavKey) -> Unit) {
   val time by rememberClock()
-  LaunchedEffect(Unit) { TrainSounds.say("Hallo! Kies een spelletje.") }
+  LaunchedEffect(Unit) { TrainSounds.say("Hallo! Waar gaan we mee spelen?") }
 
   Box(Modifier.fillMaxSize()) {
     // A parade of trains driving past along the bottom.
@@ -91,10 +99,14 @@ fun HomeScreen(onOpen: (NavKey) -> Unit) {
       drawTrain(kind, x, railY, u, cars = 2, turn = x / (1f * u), time = time)
     }
 
-    BoxWithConstraints(Modifier.fillMaxSize().safeDrawingPadding().padding(horizontal = 20.dp, vertical = 12.dp)) {
+    BoxWithConstraints(
+      Modifier.fillMaxSize()
+        .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical))
+        .padding(horizontal = 20.dp, vertical = 12.dp),
+    ) {
       val landscape = maxWidth > maxHeight
       val columns = when {
-        landscape -> 4
+        landscape -> 5
         maxWidth > 600.dp -> 3
         else -> 2
       }

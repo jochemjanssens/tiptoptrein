@@ -21,15 +21,25 @@ class MainActivity : ComponentActivity() {
     TrainSounds.init(this)
 
     enableEdgeToEdge()
-    // Full screen so little fingers don't hit the system bars by accident.
-    WindowCompat.getInsetsController(window, window.decorView).apply {
-      hide(WindowInsetsCompat.Type.systemBars())
-      systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-    }
+    hideSystemBars()
     window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
     setContent {
       TreinenpretTheme { Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) { MainNavigation() } }
+    }
+  }
+
+  override fun onWindowFocusChanged(hasFocus: Boolean) {
+    super.onWindowFocusChanged(hasFocus)
+    // Bars can come back (e.g. after a swipe or a dialog); hide them again when we're back in focus.
+    if (hasFocus) hideSystemBars()
+  }
+
+  /** Full screen so little fingers don't hit the system bars by accident. */
+  private fun hideSystemBars() {
+    WindowCompat.getInsetsController(window, window.decorView).apply {
+      hide(WindowInsetsCompat.Type.systemBars())
+      systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
     }
   }
 

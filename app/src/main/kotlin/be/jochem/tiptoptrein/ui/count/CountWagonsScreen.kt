@@ -1,5 +1,7 @@
 package be.jochem.tiptoptrein.ui.count
 
+import kotlinx.coroutines.withContext
+import be.jochem.tiptoptrein.ui.common.GameMotion
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -89,7 +91,7 @@ fun CountWagonsScreen(onHome: () -> Unit) {
     counted = 0
     wrong.clear()
     position.snapTo(0f)
-    position.animateTo(1f, tween(2800, easing = LinearOutSlowInEasing))
+    withContext(GameMotion) { position.animateTo(1f, tween(2800, easing = LinearOutSlowInEasing)) }
     step = Step.ASKING
     TrainSounds.say("Hoeveel wagons zie je?")
   }
@@ -105,7 +107,7 @@ fun CountWagonsScreen(onHome: () -> Unit) {
     step = Step.COUNTING
     stars++
     TrainSounds.play(Sfx.CORRECT)
-    scope.launch {
+    scope.launch(GameMotion) {
       delay(700)
       for (i in 1..round.cars) {
         counted = i
@@ -114,7 +116,7 @@ fun CountWagonsScreen(onHome: () -> Unit) {
         delay(750)
       }
       val word = if (round.cars == 1) "wagon" else "wagons"
-      TrainSounds.say("Goed zo! ${numberWords[round.cars].replaceFirstChar { it.uppercase() }} $word!")
+      TrainSounds.say("Super! ${numberWords[round.cars].replaceFirstChar { it.uppercase() }} $word!")
       delay(1800)
       step = Step.LEAVING
       TrainSounds.play(round.kind.sound)
