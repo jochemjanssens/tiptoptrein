@@ -237,9 +237,9 @@ fun SlideshowScreen(onHome: () -> Unit) {
 @Composable
 private fun Credit(text: String, modifier: Modifier = Modifier) {
   Text(
-    "$text · Wikimedia Commons",
-    fontSize = 9.sp,
-    lineHeight = 11.sp,
+    "$text",
+    fontSize = 6.sp,
+    lineHeight = 8.sp,
     maxLines = 1,
     overflow = TextOverflow.Ellipsis,
     color = Color.White,
