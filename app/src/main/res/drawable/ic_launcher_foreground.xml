@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- smoke -->
+    <path android:fillColor="#ECEFF1" android:pathData="M62,30a5,5 0,1 1,10 0a5,5 0,1 1,-10 0z" />
+    <path android:fillColor="#ECEFF1" android:pathData="M52,24a4,4 0,1 1,8 0a4,4 0,1 1,-8 0z" />
+    <!-- rails -->
+    <path android:fillColor="#78909C" android:pathData="M22,75h64v3h-64z" />
+    <!-- cab and roof -->
+    <path android:fillColor="#2E7D32" android:pathData="M30,42h14v24h-14z" />
+    <path android:fillColor="#263238" android:pathData="M28,39h18v4h-18z" />
+    <path android:fillColor="#FFF59D" android:pathData="M33,46h8v7h-8z" />
+    <!-- boiler and chimney -->
+    <path android:fillColor="#2E7D32" android:pathData="M44,51h28a4,4 0,0 1,4 4v6a4,4 0,0 1,-4 4h-28z" />
+    <path android:fillColor="#FFC107" android:pathData="M52,51h2v14h-2zM62,51h2v14h-2z" />
+    <path android:fillColor="#263238" android:pathData="M65,40h6v11h-6zM63,37h10v3h-10z" />
+    <!-- frame and wheels -->
+    <path android:fillColor="#D32F2F" android:pathData="M28,64h50v3h-50z" />
+    <path android:fillColor="#D32F2F" android:pathData="M76,64h3l4,10h-7z" />
+    <path android:fillColor="#263238" android:pathData="M31,69a6,6 0,1 1,12 0a6,6 0,1 1,-12 0z" />
+    <path android:fillColor="#D32F2F" android:pathData="M33,69a4,4 0,1 1,8 0a4,4 0,1 1,-8 0z" />
+    <path android:fillColor="#263238" android:pathData="M47,69a6,6 0,1 1,12 0a6,6 0,1 1,-12 0z" />
+    <path android:fillColor="#D32F2F" android:pathData="M49,69a4,4 0,1 1,8 0a4,4 0,1 1,-8 0z" />
+    <path android:fillColor="#263238" android:pathData="M64,71a4,4 0,1 1,8 0a4,4 0,1 1,-8 0z" />
+</vector>
