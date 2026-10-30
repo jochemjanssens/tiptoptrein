@@ -191,7 +191,7 @@ private fun PickTrain(onPick: (TrainKind) -> Unit) {
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
       OutlinedTitle("Kies jouw trein", fontSize = 34)
       Spacer(Modifier.height(12.dp))
-      val rows = if (landscape) listOf(racers.take(3), racers.drop(3)) else racers.chunked(2)
+      val rows = racers.chunked(2)
       rows.forEach { row ->
         Row(Modifier.fillMaxWidth().weight(1f).padding(vertical = 8.dp), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
           row.forEach { kind ->

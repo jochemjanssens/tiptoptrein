@@ -136,7 +136,7 @@ fun DriveScreen(onHome: () -> Unit) {
             } else if (front > zoneEnd + 2f) {
               TrainSounds.play(Sfx.WRONG)
               station++
-              TrainSounds.say("Oei, te ver! Op naar het volgende station.")
+              TrainSounds.say("Oei, net te ver! Dat geeft niks. Op naar het volgende station.")
               message = "Naar ${stationName(station)}"
             }
           }

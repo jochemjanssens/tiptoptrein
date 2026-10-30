@@ -19,7 +19,6 @@ const val CAR_GAP = 0.8f
 
 fun locoLength(kind: TrainKind): Float = when (kind) {
   TrainKind.STEAM -> 17.5f
-  TrainKind.SHINKANSEN -> 27f
   TrainKind.HIGH_SPEED, TrainKind.ICE, TrainKind.TGV, TrainKind.MAGLEV -> 22f
   TrainKind.TRAM -> 14f
   else -> 16f
@@ -170,10 +169,9 @@ private fun electricStyle(kind: TrainKind) = when (kind) {
   TrainKind.DOUBLE_DECKER -> ElectricStyle(NmbsWhite, NmbsBand, NmbsYellow, 8.8f, 0.8f, decks = 2, door = NmbsRed)
   TrainKind.HIGH_SPEED -> ElectricStyle(Color(0xFFCFD5DB), Color(0xFF14285A), NmbsYellow, 6.6f, 1.2f)
   // ICE: white with a red stripe. TGV: white with a dark nose and red stripe.
-  // Shinkansen: white with a blue stripe. Maglev: white with a blue stripe and an orange line.
+  // Maglev: white with a blue stripe and an orange line.
   TrainKind.ICE -> ElectricStyle(Color(0xFFF5F5F5), Color(0xFFEC0016), Color(0xFFF5F5F5), 6.6f, 1.2f)
   TrainKind.TGV -> ElectricStyle(Color(0xFFF2F2F2), Color(0xFFC8102E), Color(0xFF3A3F47), 6.8f, 1.2f)
-  TrainKind.SHINKANSEN -> ElectricStyle(Color.White, Color(0xFF1A4CA0), Color.White, 6.4f, 1.4f)
   TrainKind.MAGLEV -> ElectricStyle(Color(0xFFF8F8F8), Color(0xFF1E5AA8), Color(0xFFF8F8F8), 6.6f, 1.6f)
   TrainKind.METRO -> ElectricStyle(Color(0xFFB0BEC5), Color(0xFF37474F), Color(0xFF37474F), 7.2f, 1.4f, door = Color(0xFF37474F))
   else -> ElectricStyle(Color.Gray, Color.DarkGray, Color.Gray, 7f, 0.6f)
@@ -355,7 +353,6 @@ private fun DrawScope.electricLoco(kind: TrainKind, x: Float, railY: Float, u: F
   if (kind != TrainKind.METRO && kind != TrainKind.MAGLEV) pantograph(x + 4f * u, top, u)
 
   val noseStart = when (kind) {
-    TrainKind.SHINKANSEN -> 11f
     TrainKind.SPRINTER -> 11.5f
     TrainKind.HIGH_SPEED, TrainKind.ICE, TrainKind.TGV, TrainKind.MAGLEV -> 12f
     TrainKind.METRO -> 14.6f
@@ -368,11 +365,6 @@ private fun DrawScope.electricLoco(kind: TrainKind, x: Float, railY: Float, u: F
       TrainKind.SPRINTER -> {
         // the Desiro's round nose
         cubicTo(x + (len - 1.2f) * u, top, x + (len + 0.6f) * u, top + 2.4f * u, x + len * u, top + 5f * u)
-        lineTo(x + len * u, bottom)
-      }
-      TrainKind.SHINKANSEN -> {
-        // long flat "duck bill" nose
-        cubicTo(x + 16f * u, top, x + (len - 6f) * u, bottom - 3.4f * u, x + len * u, bottom - 1.6f * u)
         lineTo(x + len * u, bottom)
       }
       TrainKind.HIGH_SPEED, TrainKind.ICE, TrainKind.TGV, TrainKind.MAGLEV -> {
@@ -427,7 +419,7 @@ private fun DrawScope.electricLoco(kind: TrainKind, x: Float, railY: Float, u: F
   // windscreen
   val ws = Path().apply {
     when (kind) {
-      TrainKind.HIGH_SPEED, TrainKind.ICE, TrainKind.TGV, TrainKind.MAGLEV, TrainKind.SHINKANSEN -> {
+      TrainKind.HIGH_SPEED, TrainKind.ICE, TrainKind.TGV, TrainKind.MAGLEV -> {
         moveTo(x + (len - 8.5f) * u, top + 0.5f * u)
         quadraticTo(x + (len - 4.5f) * u, top + 0.6f * u, x + (len - 2.4f) * u, top + 3f * u)
         lineTo(x + (len - 7f) * u, top + 3f * u)

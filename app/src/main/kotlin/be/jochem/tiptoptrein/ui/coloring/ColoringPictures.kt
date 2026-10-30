@@ -165,7 +165,7 @@ val coloringPictures = listOf(
     ),
   ),
   ColoringPicture(
-    "Shinkansen",
+    "TGV in de bergen",
     listOf(
       BoxPart(0f, 0f, 100f, 48f),
       CirclePart(86f, 10f, 6f),

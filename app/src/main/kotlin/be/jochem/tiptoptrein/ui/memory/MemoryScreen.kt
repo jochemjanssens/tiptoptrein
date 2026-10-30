@@ -51,7 +51,7 @@ import kotlin.math.min
 // Trains that look clearly different, so pairs are easy to recognise. Each game uses six of them.
 private val pairPool = listOf(
   TrainKind.STEAM, TrainKind.INTERCITY, TrainKind.HIGH_SPEED, TrainKind.ICE, TrainKind.TGV,
-  TrainKind.SHINKANSEN, TrainKind.MAGLEV, TrainKind.FREIGHT, TrainKind.METRO, TrainKind.TRAM,
+  TrainKind.MAGLEV, TrainKind.FREIGHT, TrainKind.METRO, TrainKind.TRAM,
 )
 
 private class Card(val kind: TrainKind) {

@@ -73,7 +73,7 @@ private val activities = listOf(
 @Composable
 fun HomeScreen(onOpen: (NavKey) -> Unit) {
   val time by rememberClock()
-  LaunchedEffect(Unit) { TrainSounds.say("Hallo! Waar gaan we mee spelen?") }
+  LaunchedEffect(Unit) { TrainSounds.say("Hallo! Fijn dat je er bent. Waar gaan we mee spelen?") }
 
   Box(Modifier.fillMaxSize()) {
     // A parade of trains driving past along the bottom.

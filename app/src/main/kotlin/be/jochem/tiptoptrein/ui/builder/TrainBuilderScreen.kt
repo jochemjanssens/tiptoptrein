@@ -235,7 +235,7 @@ private class Geometry(val u: Float, val railY: Float, val left: Float)
 
 /** Where the standing train is drawn; always sized for a full train so it doesn't jump around. */
 private fun previewGeometry(w: Float, h: Float, loco: TrainKind, wagons: Int): Geometry {
-  val maxLen = trainLength(TrainKind.SHINKANSEN, MAX_WAGONS)
+  val maxLen = trainLength(TrainKind.HIGH_SPEED, MAX_WAGONS)
   val u = min(h / 15f, w / (maxLen + 4f))
   val len = trainLength(loco, wagons) * u
   return Geometry(u, h * 0.82f, (w - len) / 2f)

@@ -23,6 +23,7 @@ enum class Sfx { WHISTLE, HORN, BELL, CORRECT, WRONG, POP }
  */
 object TrainSounds {
   private const val RATE = 22050
+  private const val SENTENCE_PAUSE_MS = 280L
 
   private var pool: SoundPool? = null
   private val ids = mutableMapOf<Sfx, Int>()
@@ -56,9 +57,9 @@ object TrainSounds {
         val available = tts?.isLanguageAvailable(flemish) ?: TextToSpeech.LANG_NOT_SUPPORTED
         tts?.language = if (available >= TextToSpeech.LANG_COUNTRY_AVAILABLE) flemish else Locale.forLanguageTag("nl-NL")
         pickBestVoice()
-        // A bit higher and quicker sounds cheerful and lively, like reading to a child.
-        tts?.setSpeechRate(1.05f)
-        tts?.setPitch(1.3f)
+        // Calm and a little slower, like reading aloud to a child. A much higher pitch sounds shrill.
+        tts?.setSpeechRate(0.88f)
+        tts?.setPitch(1.12f)
         ttsReady = true
       }
     }
@@ -82,13 +83,23 @@ object TrainSounds {
   /** Speaks [text], replacing whatever is being said right now. */
   fun say(text: String) {
     if (muted || !ttsReady) return
-    tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, text.hashCode().toString())
+    tts?.stop()
+    speakSentences(text)
   }
 
   /** Speaks [text] after whatever is being said right now. */
   fun sayNext(text: String) {
     if (muted || !ttsReady) return
-    tts?.speak(text, TextToSpeech.QUEUE_ADD, null, text.hashCode().toString())
+    speakSentences(text)
+  }
+
+  /** Reads sentence by sentence with a short breath in between, which sounds much less rushed. */
+  private fun speakSentences(text: String) {
+    val engine = tts ?: return
+    text.split(Regex("(?<=[.!?])\\s+")).forEachIndexed { i, sentence ->
+      if (i > 0) engine.playSilentUtterance(SENTENCE_PAUSE_MS, TextToSpeech.QUEUE_ADD, null)
+      engine.speak(sentence, TextToSpeech.QUEUE_ADD, null, "$i-${sentence.hashCode()}")
+    }
   }
 
   fun stopSpeaking() {

@@ -64,12 +64,6 @@ enum class TrainKind(
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_tgv, "Foto: Florian Pépellin, CC BY-SA 4.0"),
   ),
-  SHINKANSEN(
-    "Shinkansen", "shinkansens",
-    "De Shinkansen rijdt in Japan. Hij heeft een hele lange neus. Ze noemen hem de kogeltrein!",
-    Sfx.HORN, Scenery.MOUNTAIN, 2,
-    Photo(R.drawable.photo_shinkansen, "Foto: Alpsdake, CC BY-SA 4.0"),
-  ),
   MAGLEV(
     "Zweeftrein", "zweeftreinen",
     "De zweeftrein heeft geen wielen! Magneten laten hem zweven. Hij rijdt in China. Heel, heel snel!",
@@ -98,5 +92,4 @@ enum class TrainKind(
 
 /** Trains that go faster than 250 km/h. */
 val TrainKind.isHighSpeed: Boolean
-  get() = this == TrainKind.HIGH_SPEED || this == TrainKind.ICE || this == TrainKind.TGV ||
-    this == TrainKind.SHINKANSEN || this == TrainKind.MAGLEV
+  get() = this == TrainKind.HIGH_SPEED || this == TrainKind.ICE || this == TrainKind.TGV || this == TrainKind.MAGLEV

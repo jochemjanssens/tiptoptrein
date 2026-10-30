@@ -66,7 +66,7 @@ fun ColoringScreen(onHome: () -> Unit) {
     if (done && !praised[pictureIndex]) {
       praised[pictureIndex] = true
       TrainSounds.play(Sfx.CORRECT)
-      TrainSounds.say("Wat mooi!")
+      TrainSounds.say("Wat mooi gekleurd!")
     }
   }
 

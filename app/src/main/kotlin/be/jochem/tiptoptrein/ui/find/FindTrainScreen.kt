@@ -55,7 +55,6 @@ private val groups = listOf(
   listOf(TrainKind.HIGH_SPEED),
   listOf(TrainKind.ICE),
   listOf(TrainKind.TGV),
-  listOf(TrainKind.SHINKANSEN),
   listOf(TrainKind.MAGLEV),
   listOf(TrainKind.FREIGHT),
   listOf(TrainKind.METRO),
@@ -92,7 +91,7 @@ fun FindTrainScreen(onHome: () -> Unit) {
       solved = true
       stars++
       TrainSounds.play(Sfx.CORRECT)
-      TrainSounds.say("Jaaa! Super goed!")
+      TrainSounds.say("Ja, goed gevonden! Knap van jou!")
       scope.launch {
         delay(600)
         TrainSounds.play(kind.sound)
@@ -102,7 +101,7 @@ fun FindTrainScreen(onHome: () -> Unit) {
     } else {
       wrong.add(kind)
       TrainSounds.play(Sfx.WRONG)
-      TrainSounds.say("Nee, dat is de ${kind.title}. Waar is de ${question.answer.title}?")
+      TrainSounds.say("Bijna! Dat is de ${kind.title}. Waar is de ${question.answer.title}?")
     }
   }
 

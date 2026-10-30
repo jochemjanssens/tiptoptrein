@@ -100,7 +100,7 @@ fun CountWagonsScreen(onHome: () -> Unit) {
     if (step != Step.ASKING) return
     if (n != round.cars) {
       TrainSounds.play(Sfx.WRONG)
-      TrainSounds.say("Tel nog eens!")
+      TrainSounds.say("Bijna! Tel maar rustig nog eens.")
       wrong.add(n)
       return
     }
@@ -116,7 +116,7 @@ fun CountWagonsScreen(onHome: () -> Unit) {
         delay(750)
       }
       val word = if (round.cars == 1) "wagon" else "wagons"
-      TrainSounds.say("Super! ${numberWords[round.cars].replaceFirstChar { it.uppercase() }} $word!")
+      TrainSounds.say("Goed geteld! ${numberWords[round.cars].replaceFirstChar { it.uppercase() }} $word!")
       delay(1800)
       step = Step.LEAVING
       TrainSounds.play(round.kind.sound)

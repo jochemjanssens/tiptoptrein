@@ -92,7 +92,7 @@ fun SlideshowScreen(onHome: () -> Unit) {
       if (position.value != 1f) position.animateTo(1f, tween(800))
       return@withContext
     }
-    delay((4000 + kind.fact.length * 80).toLong())
+    delay((6000 + kind.fact.length * 100).toLong())
     launch { photoScale.animateTo(0f, tween(400)) }
     position.animateTo(2f, tween(1800, easing = FastOutLinearInEasing))
     index = (index + 1) % kinds.size
@@ -249,7 +249,7 @@ private fun Credit(text: String, modifier: Modifier = Modifier) {
   )
 }
 
-private val intros = listOf("Kijk eens! ", "Wauw! ", "Hoera! ", "Daar is ")
+private val intros = listOf("Kijk eens! ", "Oh, wat mooi! ", "Goed kijken! ", "Daar is ")
 
 /** A cheerful opening line before the fact, e.g. "Wauw! De Eurostar!". */
 private fun intro(index: Int, kind: TrainKind): String {
