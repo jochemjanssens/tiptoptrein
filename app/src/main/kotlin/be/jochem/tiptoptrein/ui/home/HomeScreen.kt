@@ -51,7 +51,6 @@ import be.jochem.tiptoptrein.trains.drawScenery
 import be.jochem.tiptoptrein.trains.drawTrain
 import be.jochem.tiptoptrein.trains.trainLength
 import be.jochem.tiptoptrein.ui.common.BouncyButton
-import be.jochem.tiptoptrein.ui.common.OutlinedTitle
 import be.jochem.tiptoptrein.ui.common.rememberClock
 import kotlin.math.min
 
@@ -111,11 +110,11 @@ fun HomeScreen(onOpen: (NavKey) -> Unit) {
         else -> 2
       }
       // Leave the bottom part of the screen for the passing trains.
-      val gridHeight = if (landscape) maxHeight * 0.66f else maxHeight * 0.74f
+      val gridHeight = if (landscape) maxHeight * 0.6f else maxHeight * 0.74f
       val wide = maxWidth > 700.dp
       val cardSide = min(maxWidth.value / columns, gridHeight.value / ((activities.size + columns - 1) / columns))
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        OutlinedTitle("TipTop Trein", fontSize = if (wide) 52 else 40)
+        TrainTitle(wide)
         Spacer(Modifier.height(10.dp))
         Column(
           Modifier.fillMaxWidth().height(gridHeight),
