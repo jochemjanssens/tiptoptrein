@@ -26,7 +26,7 @@ gh secret set PLAY_SERVICE_ACCOUNT_JSON < pad/naar/service-account.json
    - Inhoudsclassificatie-vragenlijst, advertenties: nee.
 5. **Store-vermelding**: teksten hieronder, icoon 512×512, feature graphic 1024×500 en schermafbeeldingen (telefoon én 7"/10" tablet).
 
-Daarna: elke push naar `main` → nieuwe versie als concept op de interne test. Via *Actions → Build and release → Run workflow* kies je een andere track (beta, productie) en status `completed`.
+Daarna: elke push naar `main` → nieuwe versie wordt meteen uitgerold op de interne test. Via *Actions → Build and release → Run workflow* kies je een andere track (beta, productie) of status `draft` als een release eerst als concept moet klaarstaan.
 
 ## Store-teksten
 

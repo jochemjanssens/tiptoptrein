@@ -20,7 +20,7 @@ enum class TrainKind(
   val sound: Sfx,
   val scenery: Scenery,
   val cars: Int,
-  val photo: Photo,
+  vararg photoList: Photo,
 ) {
   STEAM(
     "Stoomtrein", "stoomtreinen",
@@ -33,61 +33,75 @@ enum class TrainKind(
     "Dit is de IC-trein. Hij rijdt van stad naar stad. Hij stopt niet overal. Zo gaat hij snel!",
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_intercity, "Foto: Stratoswift, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_intercity2, "Foto: Stratoswift, CC BY-SA 4.0"),
   ),
   SPRINTER(
     "Desiro", "desiro's",
     "Dit is de Desiro. Hij stopt bij veel kleine stations. Deuren open. Instappen maar!",
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_desiro, "Foto: Mini1300, CC0"),
+    Photo(R.drawable.photo_desiro2, "Foto: RomainDil, CC BY-SA 4.0"),
   ),
   DOUBLE_DECKER(
     "Dubbeldekker", "dubbeldekkers",
     "Deze trein heeft een boven en een beneden. Net als een huis met een trap! Wil jij boven zitten?",
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_m7, "Foto: Traveller-chewy93, CC0"),
+    Photo(R.drawable.photo_m72, "Foto: Traveller-chewy93, CC0"),
   ),
   HIGH_SPEED(
     "Eurostar", "eurostars",
     "De Eurostar is super snel. Zoef! Hij rijdt zelfs onder de zee door.",
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_eurostar, "Foto: Smiley.toerist, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_eurostar2, "Foto: Stratoswift, CC BY 4.0"),
   ),
   ICE(
     "ICE", "ICE's",
     "De ICE komt uit Duitsland. Hij is wit met een rode streep. Hij rijdt van Brussel naar Duitsland. Zoef!",
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_ice, "Foto: Joshua Brown, CC BY-SA 2.0"),
+    Photo(R.drawable.photo_ice2, "Foto: Rob Dammers, CC BY 2.0"),
   ),
   TGV(
     "TGV", "TGV's",
     "De TGV komt uit Frankrijk. Een TGV reed ooit bijna zeshonderd kilometer per uur. Dat is een wereldrecord!",
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_tgv, "Foto: Florian Pépellin, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_tgv2, "Foto: Superalbs, CC BY-SA 4.0"),
   ),
   MAGLEV(
     "Zweeftrein", "zweeftreinen",
     "De zweeftrein heeft geen wielen! Magneten laten hem zweven. Hij rijdt in China. Heel, heel snel!",
     Sfx.HORN, Scenery.CITY, 2,
     Photo(R.drawable.photo_maglev, "Foto: Alex Needham, publiek domein"),
+    Photo(R.drawable.photo_maglev2, "Foto: kallerna, CC BY-SA 4.0"),
   ),
   FREIGHT(
     "Goederentrein", "goederentreinen",
     "Deze trein neemt geen mensen mee. Hij neemt grote dozen mee. Die heten containers.",
     Sfx.HORN, Scenery.PORT, 3,
     Photo(R.drawable.photo_freight, "Foto: Smiley.toerist, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_freight2, "Foto: Nicky Boogaard, CC BY 2.0"),
   ),
   METRO(
     "Metro", "metro's",
     "De metro rijdt onder de grond. In een lange tunnel. Zie je de lampjes?",
     Sfx.BELL, Scenery.TUNNEL, 2,
     Photo(R.drawable.photo_metro, "Foto: Tohaomg, CC0"),
+    Photo(R.drawable.photo_metro2, "Foto: William Murphy, CC BY-SA 2.0"),
   ),
   TRAM(
     "Kusttram", "kusttrams",
     "De kusttram rijdt langs de zee. Op naar het strand! Ding ding!",
     Sfx.BELL, Scenery.BEACH, 2,
     Photo(R.drawable.photo_tram, "Foto: Snoopy 31, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_tram2, "Foto: FaceMePLS, CC BY 2.0"),
   ),
+  ;
+
+  /** Real photos of this train; the first one is shown first. */
+  val photos: List<Photo> = photoList.toList()
 }
 
 /** Trains that go faster than 250 km/h. */

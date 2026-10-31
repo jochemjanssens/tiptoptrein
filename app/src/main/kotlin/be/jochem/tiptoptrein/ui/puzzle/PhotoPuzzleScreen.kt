@@ -95,7 +95,8 @@ fun PhotoPuzzleScreen(onHome: () -> Unit) {
   ) {
     BoxWithConstraints(Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp, top = 84.dp, bottom = 16.dp)) {
       val density = LocalDensity.current
-      val photo = ImageBitmap.imageResource(kind.photo.res)
+      val picture = remember(round) { kind.photos.random() }
+      val photo = ImageBitmap.imageResource(picture.res)
       val (cols, rows) = levelGrids[level]
       val areaW = with(density) { maxWidth.toPx() }
       val areaH = with(density) { maxHeight.toPx() }
@@ -145,7 +146,7 @@ fun PhotoPuzzleScreen(onHome: () -> Unit) {
           .background(Color.White, RoundedCornerShape(4.dp)),
       ) {
         Image(
-          painterResource(kind.photo.res), null,
+          painterResource(picture.res), null,
           contentScale = ContentScale.FillBounds,
           modifier = Modifier.fillMaxSize().alpha(0.22f),
         )

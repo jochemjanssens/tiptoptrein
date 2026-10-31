@@ -2,6 +2,7 @@ package be.jochem.tiptoptrein.ui.slideshow
 
 import kotlinx.coroutines.withContext
 import be.jochem.tiptoptrein.ui.common.GameMotion
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -61,6 +62,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.min
 
 private val kinds = TrainKind.entries
+private const val PHOTO_SECONDS = 8
 
 @Composable
 fun SlideshowScreen(onHome: () -> Unit) {
@@ -72,6 +74,8 @@ fun SlideshowScreen(onHome: () -> Unit) {
   val photoScale = remember { Animatable(0f) }
   val time by rememberClock()
   val kind = kinds[index]
+  var photoStep by remember { mutableIntStateOf(0) }
+  val photo = kind.photos[photoStep % kind.photos.size]
 
   // The slide whose entrance animation has finished, so pausing doesn't replay it.
   var shownIndex by remember { mutableIntStateOf(-1) }
@@ -88,6 +92,8 @@ fun SlideshowScreen(onHome: () -> Unit) {
       TrainSounds.say(intro(index, kind) + kind.fact)
       shownIndex = index
     }
+    // Pausing during the exit shrinks the photo away, so always bring it back.
+    launch { photoScale.animateTo(1f, spring(dampingRatio = 0.5f, stiffness = 200f)) }
     if (!playing || bigPhoto) {
       if (position.value != 1f) position.animateTo(1f, tween(800))
       return@withContext
@@ -98,6 +104,15 @@ fun SlideshowScreen(onHome: () -> Unit) {
     index = (index + 1) % kinds.size
     }
   }
+
+  // Trains with more photos show them one after the other.
+  LaunchedEffect(index, playing, bigPhoto) {
+    while (playing && !bigPhoto) {
+      delay(PHOTO_SECONDS * 1000L)
+      photoStep++
+    }
+  }
+  LaunchedEffect(index) { photoStep = 0 }
 
   fun jump(delta: Int) {
     TrainSounds.stopSpeaking()
@@ -169,13 +184,20 @@ fun SlideshowScreen(onHome: () -> Unit) {
           .padding(8.dp)
           .clickable(remember { MutableInteractionSource() }, indication = null) { bigPhoto = true },
       ) {
-        Image(
-          painterResource(kind.photo.res),
-          contentDescription = kind.title,
-          contentScale = ContentScale.Crop,
-          modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)),
-        )
-        Credit(kind.photo.credit, Modifier.align(Alignment.BottomEnd))
+        Crossfade(photo, label = "photo") { shown ->
+          Box(Modifier.fillMaxSize()) {
+            Image(
+              painterResource(shown.res),
+              contentDescription = kind.title,
+              contentScale = ContentScale.Crop,
+              modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(6.dp)),
+            )
+            Credit(shown.credit, Modifier.align(Alignment.BottomEnd))
+          }
+        }
+        if (kind.photos.size > 1) {
+          EmojiButton("📷", onClick = { photoStep++ }, size = 52.dp, modifier = Modifier.align(Alignment.TopEnd).padding(6.dp))
+        }
       }
 
       val factModifier = if (compact) {
@@ -222,12 +244,15 @@ fun SlideshowScreen(onHome: () -> Unit) {
         .clickable(remember { MutableInteractionSource() }, indication = null) { bigPhoto = false },
     ) {
       Image(
-        painterResource(kind.photo.res),
+        painterResource(photo.res),
         contentDescription = kind.title,
         contentScale = ContentScale.Fit,
         modifier = Modifier.fillMaxSize().padding(24.dp),
       )
-      Credit(kind.photo.credit, Modifier.align(Alignment.BottomEnd).padding(24.dp))
+      Credit(photo.credit, Modifier.align(Alignment.BottomEnd).padding(24.dp))
+      if (kind.photos.size > 1) {
+        EmojiButton("📷", onClick = { photoStep++ }, size = 64.dp, modifier = Modifier.align(Alignment.BottomStart).padding(20.dp))
+      }
       EmojiButton("✖️", onClick = { bigPhoto = false }, size = 64.dp, modifier = Modifier.align(Alignment.TopEnd).padding(20.dp))
     }
   }
