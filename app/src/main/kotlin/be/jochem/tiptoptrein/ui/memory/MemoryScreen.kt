@@ -1,5 +1,16 @@
 package be.jochem.tiptoptrein.ui.memory
 
+import be.jochem.tiptoptrein.ui.common.EmojiButton
+import be.jochem.tiptoptrein.trains.watchableTrains
+import be.jochem.tiptoptrein.trains.Photo
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.Image
+import android.content.Context
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -54,16 +65,26 @@ private val pairPool = listOf(
   TrainKind.MAGLEV, TrainKind.FREIGHT, TrainKind.METRO, TrainKind.TRAM,
 )
 
-private class Card(val kind: TrainKind) {
+/** A card shows either a drawn train or, when [photo] is set, a real photo of it. */
+private class Card(val kind: TrainKind, val photo: Photo?) {
   var faceUp by mutableStateOf(false)
   var matched by mutableStateOf(false)
 }
 
-private fun newDeck() = pairPool.shuffled().take(6).let { (it + it).shuffled().map { k -> Card(k) } }
+/** Six pairs. With photos, both cards of a pair show the same real photo. */
+private fun newDeck(photos: Boolean): List<Card> {
+  val kinds = (if (photos) watchableTrains else pairPool).shuffled().take(6)
+  val faces = kinds.map { it to if (photos) it.photos.random() else null }
+  return (faces + faces).shuffled().map { (kind, photo) -> Card(kind, photo) }
+}
+
+private const val PREFS = "memory"
 
 @Composable
 fun MemoryScreen(onHome: () -> Unit) {
-  var deck by remember { mutableStateOf(newDeck()) }
+  val prefs = LocalContext.current.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+  var photos by remember { mutableStateOf(prefs.getBoolean("photos", false)) }
+  var deck by remember { mutableStateOf(newDeck(photos)) }
   val open = remember { mutableStateListOf<Card>() }
   var busy by remember { mutableStateOf(false) }
   var turns by remember { mutableIntStateOf(0) }
@@ -106,6 +127,22 @@ fun MemoryScreen(onHome: () -> Unit) {
   GameFrame(
     title = "Treinen-memory",
     onHome = onHome,
+    actions = {
+      // Choose drawn trains or real photos; switching starts a new game.
+      for ((usePhotos, emoji) in listOf(false to "✏️", true to "📷")) {
+        EmojiButton(emoji, onClick = {
+          if (photos != usePhotos) {
+            photos = usePhotos
+            prefs.edit().putBoolean("photos", usePhotos).apply()
+            deck = newDeck(usePhotos)
+            open.clear()
+            turns = 0
+            TrainSounds.say(if (usePhotos) "Memory met echte treinen!" else "Memory met tekeningen!")
+          }
+        }, size = 56.dp, color = if (photos == usePhotos) Color(0xFFFFC107) else Color.White)
+        Spacer(Modifier.width(10.dp))
+      }
+    },
     background = {
       Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFFFFCC80), Color(0xFFFF8A65)))))
     },
@@ -132,7 +169,7 @@ fun MemoryScreen(onHome: () -> Unit) {
         Text("Alles gevonden!", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color(0xFF263238))
         BouncyButton(
           onClick = {
-            deck = newDeck()
+            deck = newDeck(photos)
             turns = 0
           },
           modifier = Modifier.padding(top = 16.dp).size(width = 240.dp, height = 72.dp),
@@ -176,7 +213,14 @@ private fun MemoryCard(card: Card, modifier: Modifier, onTap: () -> Unit) {
           .background(if (card.matched) Color(0xFFC8E6C9) else Color(0xFFE1F5FE), shape)
           .border(4.dp, if (card.matched) Color(0xFF66BB6A) else Color.White, shape),
       ) {
-        Canvas(Modifier.fillMaxSize().padding(6.dp)) {
+        if (card.photo != null) {
+          Image(
+            painterResource(card.photo.res),
+            contentDescription = card.kind.title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize().padding(4.dp).clip(RoundedCornerShape(14.dp)),
+          )
+        } else Canvas(Modifier.fillMaxSize().padding(6.dp)) {
           val len = locoLength(card.kind)
           val u = min(size.height / 14f, size.width / (len + 3f))
           val railY = size.height * 0.8f

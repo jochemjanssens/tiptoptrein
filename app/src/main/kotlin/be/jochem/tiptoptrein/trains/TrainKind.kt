@@ -1,6 +1,7 @@
 package be.jochem.tiptoptrein.trains
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.RawRes
 import be.jochem.tiptoptrein.R
 import be.jochem.tiptoptrein.sound.Sfx
 
@@ -8,6 +9,9 @@ enum class Scenery { COUNTRY, CITY, TUNNEL, PORT, MOUNTAIN, BEACH }
 
 /** A real photo from Wikimedia Commons, with the credit its license asks for. */
 class Photo(@param:DrawableRes val res: Int, val credit: String)
+
+/** A short real video clip from Wikimedia Commons, with its credit. */
+class Video(@param:RawRes val res: Int, val credit: String)
 
 /**
  * Belgian trains. The [fact] is read aloud to a six-year-old, so it uses short sentences and
@@ -34,6 +38,10 @@ enum class TrainKind(
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_intercity, "Foto: Stratoswift, CC BY-SA 4.0"),
     Photo(R.drawable.photo_intercity2, "Foto: Stratoswift, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_ic3, "Foto: Stratoswift, CC BY 4.0"),
+    Photo(R.drawable.photo_ic4, "Foto: Stratoswift, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_ic5, "Foto: Stratoswift, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_ic6, "Foto: Stratoswift, CC BY-SA 4.0"),
   ),
   SPRINTER(
     "Desiro", "desiro's",
@@ -41,6 +49,10 @@ enum class TrainKind(
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_desiro, "Foto: Mini1300, CC0"),
     Photo(R.drawable.photo_desiro2, "Foto: RomainDil, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_desiro3, "Foto: Nelso Silva, CC BY-SA 2.0"),
+    Photo(R.drawable.photo_desiro4, "Foto: Nelso Silva, CC BY-SA 2.0"),
+    Photo(R.drawable.photo_desiro5, "Foto: LouisCartier, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_desiro6, "Foto: Trougnouf, CC BY 4.0"),
   ),
   DOUBLE_DECKER(
     "Dubbeldekker", "dubbeldekkers",
@@ -48,6 +60,9 @@ enum class TrainKind(
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_m7, "Foto: Traveller-chewy93, CC0"),
     Photo(R.drawable.photo_m72, "Foto: Traveller-chewy93, CC0"),
+    Photo(R.drawable.photo_m73, "Foto: Stratoswift, CC BY 4.0"),
+    Photo(R.drawable.photo_m74, "Foto: Stratoswift, CC BY 4.0"),
+    Photo(R.drawable.photo_m75, "Foto: Stratoswift, CC BY-SA 4.0"),
   ),
   HIGH_SPEED(
     "Eurostar", "eurostars",
@@ -55,6 +70,10 @@ enum class TrainKind(
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_eurostar, "Foto: Smiley.toerist, CC BY-SA 4.0"),
     Photo(R.drawable.photo_eurostar2, "Foto: Stratoswift, CC BY 4.0"),
+    Photo(R.drawable.photo_eurostar3, "Foto: RAIL P, CC0"),
+    Photo(R.drawable.photo_eurostar4, "Foto: Florian Pépellin, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_eurostar5, "Foto: Stratoswift, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_eurostar6, "Foto: Sjenghai, CC BY-SA 4.0"),
   ),
   ICE(
     "ICE", "ICE's",
@@ -62,6 +81,10 @@ enum class TrainKind(
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_ice, "Foto: Joshua Brown, CC BY-SA 2.0"),
     Photo(R.drawable.photo_ice2, "Foto: Rob Dammers, CC BY 2.0"),
+    Photo(R.drawable.photo_ice3, "Foto: Nelso Silva, CC BY-SA 2.0"),
+    Photo(R.drawable.photo_ice4, "Foto: TheJRB, CC BY-SA 2.0"),
+    Photo(R.drawable.photo_ice5, "Foto: Alex Noble, CC0"),
+    Photo(R.drawable.photo_ice6, "Foto: Wi1234, CC BY-SA 3.0"),
   ),
   TGV(
     "TGV", "TGV's",
@@ -69,6 +92,10 @@ enum class TrainKind(
     Sfx.HORN, Scenery.COUNTRY, 2,
     Photo(R.drawable.photo_tgv, "Foto: Florian Pépellin, CC BY-SA 4.0"),
     Photo(R.drawable.photo_tgv2, "Foto: Superalbs, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_tgv3, "Foto: Francisco Welter-Schultes, CC0"),
+    Photo(R.drawable.photo_tgv4, "Foto: Jon Worth, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_tgv5, "Foto: Florianol45, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_tgv6, "Foto: Smiley.toerist, CC BY-SA 4.0"),
   ),
   MAGLEV(
     "Zweeftrein", "zweeftreinen",
@@ -76,6 +103,9 @@ enum class TrainKind(
     Sfx.HORN, Scenery.CITY, 2,
     Photo(R.drawable.photo_maglev, "Foto: Alex Needham, publiek domein"),
     Photo(R.drawable.photo_maglev2, "Foto: kallerna, CC BY-SA 4.0"),
+    Photo(R.drawable.photo_maglev4, "Foto: Lars Plougmann, CC BY-SA 2.0"),
+    Photo(R.drawable.photo_maglev5, "Foto: Max Talbot-Minkin, CC BY 2.0"),
+    Photo(R.drawable.photo_maglev6, "Foto: 惭, CC BY 4.0"),
   ),
   FREIGHT(
     "Goederentrein", "goederentreinen",
@@ -107,3 +137,18 @@ enum class TrainKind(
 /** Trains that go faster than 250 km/h. */
 val TrainKind.isHighSpeed: Boolean
   get() = this == TrainKind.HIGH_SPEED || this == TrainKind.ICE || this == TrainKind.TGV || this == TrainKind.MAGLEV
+
+/** A short film of this train, for the trains that have one. */
+val TrainKind.video: Video?
+  get() = when (this) {
+    TrainKind.HIGH_SPEED -> Video(R.raw.video_eurostar, "Film: Stratoswift, CC BY-SA 4.0")
+    TrainKind.ICE -> Video(R.raw.video_ice, "Film: Quahadi, CC BY-SA 4.0")
+    TrainKind.TGV -> Video(R.raw.video_tgv, "Film: ManuelB701, CC0")
+    else -> null
+  }
+
+/** The trains in "Treinen kijken": Belgian passenger trains and high-speed trains. */
+val watchableTrains = listOf(
+  TrainKind.INTERCITY, TrainKind.SPRINTER, TrainKind.DOUBLE_DECKER,
+  TrainKind.HIGH_SPEED, TrainKind.ICE, TrainKind.TGV, TrainKind.MAGLEV,
+)
