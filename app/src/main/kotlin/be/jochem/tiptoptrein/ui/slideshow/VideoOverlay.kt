@@ -97,7 +97,6 @@ fun VideoOverlay(video: Video, onClose: () -> Unit) {
           player.play()
         }, size = 110.dp, color = Color(0xFFFFC107), modifier = Modifier.align(Alignment.Center))
       }
-      Credit(video.credit, Modifier.align(Alignment.BottomEnd).padding(16.dp))
     }
   }
 }

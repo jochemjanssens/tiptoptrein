@@ -7,10 +7,13 @@ import be.jochem.tiptoptrein.sound.Sfx
 
 enum class Scenery { COUNTRY, CITY, TUNNEL, PORT, MOUNTAIN, BEACH }
 
-/** A real photo from Wikimedia Commons, with the credit its license asks for. */
+/**
+ * A real photo from Wikimedia Commons. The app is for private use, so [credit] is not shown; it is
+ * kept for when the app is shared, because the photos' Creative Commons licenses then ask for it.
+ */
 class Photo(@param:DrawableRes val res: Int, val credit: String)
 
-/** A short real video clip from Wikimedia Commons, with its credit. */
+/** A short real video clip from Wikimedia Commons; [credit] is kept like a [Photo]'s. */
 class Video(@param:RawRes val res: Int, val credit: String)
 
 /**

@@ -138,15 +138,12 @@ fun SlideshowScreen(onHome: () -> Unit) {
           .clickable(remember { MutableInteractionSource() }, indication = null) { photoStep++ },
       ) {
         Crossfade(photo, label = "photo") { shown ->
-          Box(Modifier.fillMaxSize()) {
-            Image(
-              painterResource(shown.res),
-              contentDescription = kind.title,
-              contentScale = ContentScale.Crop,
-              modifier = Modifier.fillMaxSize(),
-            )
-            Credit(shown.credit, Modifier.align(Alignment.TopEnd))
-          }
+          Image(
+            painterResource(shown.res),
+            contentDescription = kind.title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+          )
         }
         // The fact, readable on top of the photo.
         Column(
@@ -202,20 +199,4 @@ private val intros = listOf("Kijk eens! ", "Oh, wat mooi! ", "Goed kijken! ", "D
 private fun intro(index: Int, kind: TrainKind): String {
   val start = intros[index % intros.size]
   return if (start == "Daar is ") "Daar is de ${kind.title}! " else "${start}De ${kind.title}! "
-}
-
-/** Photographer credit, required by the photos' Creative Commons licenses. */
-@Composable
-fun Credit(text: String, modifier: Modifier = Modifier) {
-  Text(
-    "$text · Wikimedia Commons",
-    fontSize = 9.sp,
-    lineHeight = 11.sp,
-    maxLines = 1,
-    overflow = TextOverflow.Ellipsis,
-    color = Color.White,
-    modifier = modifier
-      .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(bottomStart = 6.dp))
-      .padding(horizontal = 6.dp, vertical = 2.dp),
-  )
 }
