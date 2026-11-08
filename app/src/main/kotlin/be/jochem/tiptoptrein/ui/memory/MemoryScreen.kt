@@ -1,16 +1,15 @@
 package be.jochem.tiptoptrein.ui.memory
 
-import be.jochem.tiptoptrein.ui.common.EmojiButton
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.runtime.LaunchedEffect
 import be.jochem.tiptoptrein.trains.watchableTrains
 import be.jochem.tiptoptrein.trains.Photo
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.draw.clip
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.Image
-import android.content.Context
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -78,18 +77,25 @@ private fun newDeck(photos: Boolean): List<Card> {
   return (faces + faces).shuffled().map { (kind, photo) -> Card(kind, photo) }
 }
 
-private const val PREFS = "memory"
-
 @Composable
 fun MemoryScreen(onHome: () -> Unit) {
-  val prefs = LocalContext.current.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
-  var photos by remember { mutableStateOf(prefs.getBoolean("photos", false)) }
-  var deck by remember { mutableStateOf(newDeck(photos)) }
+  // null until the child has picked drawn trains (false) or real photos (true).
+  var photos by remember { mutableStateOf<Boolean?>(null) }
+  var deck by remember { mutableStateOf(emptyList<Card>()) }
   val open = remember { mutableStateListOf<Card>() }
   var busy by remember { mutableStateOf(false) }
   var turns by remember { mutableIntStateOf(0) }
   val scope = rememberCoroutineScope()
-  val won = deck.all { it.matched }
+  val won = deck.isNotEmpty() && deck.all { it.matched }
+
+  LaunchedEffect(photos) { if (photos == null) TrainSounds.say("Met tekeningen, of met echte treinen?") }
+
+  fun start(usePhotos: Boolean) {
+    photos = usePhotos
+    deck = newDeck(usePhotos)
+    open.clear()
+    turns = 0
+  }
 
   fun tap(card: Card) {
     if (busy || card.faceUp || card.matched) return
@@ -127,26 +133,14 @@ fun MemoryScreen(onHome: () -> Unit) {
   GameFrame(
     title = "Treinen-memory",
     onHome = onHome,
-    actions = {
-      // Choose drawn trains or real photos; switching starts a new game.
-      for ((usePhotos, emoji) in listOf(false to "✏️", true to "📷")) {
-        EmojiButton(emoji, onClick = {
-          if (photos != usePhotos) {
-            photos = usePhotos
-            prefs.edit().putBoolean("photos", usePhotos).apply()
-            deck = newDeck(usePhotos)
-            open.clear()
-            turns = 0
-            TrainSounds.say(if (usePhotos) "Memory met echte treinen!" else "Memory met tekeningen!")
-          }
-        }, size = 56.dp, color = if (photos == usePhotos) Color(0xFFFFC107) else Color.White)
-        Spacer(Modifier.width(10.dp))
-      }
-    },
     background = {
       Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFFFFCC80), Color(0xFFFF8A65)))))
     },
   ) {
+    if (photos == null) {
+      ChooseMode(::start)
+      return@GameFrame
+    }
     BoxWithConstraints(Modifier.fillMaxSize().padding(start = 20.dp, end = 20.dp, top = 84.dp, bottom = 16.dp)) {
     val columns = if (maxWidth > maxHeight) 6 else 3
     Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -168,15 +162,20 @@ fun MemoryScreen(onHome: () -> Unit) {
         OutlinedTitle("🎉 Hoera! 🎉", fontSize = 40, color = Color(0xFFFFC107))
         Text("Alles gevonden!", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color(0xFF263238))
         BouncyButton(
-          onClick = {
-            deck = newDeck(photos)
-            turns = 0
-          },
+          onClick = { start(photos == true) },
           modifier = Modifier.padding(top = 16.dp).size(width = 240.dp, height = 72.dp),
           color = Color(0xFF43A047),
           shape = RoundedCornerShape(36.dp),
         ) {
           Text("🔁 Nog een keer", fontSize = 24.sp, fontWeight = FontWeight.Black, color = Color.White)
+        }
+        BouncyButton(
+          onClick = { photos = null },
+          modifier = Modifier.padding(top = 12.dp).size(width = 240.dp, height = 64.dp),
+          color = Color(0xFF1E88E5),
+          shape = RoundedCornerShape(32.dp),
+        ) {
+          Text("🔀 Iets anders", fontSize = 22.sp, fontWeight = FontWeight.Black, color = Color.White)
         }
       }
     }
@@ -227,6 +226,64 @@ private fun MemoryCard(card: Card, modifier: Modifier, onTap: () -> Unit) {
           drawRails(railY, u)
           drawTrain(card.kind, (size.width - len * u) / 2f, railY, u, cars = 0, time = 0.6f)
         }
+      }
+    }
+  }
+}
+
+/** The screen before the game: play with drawn trains or with real photos. */
+@Composable
+private fun ChooseMode(onPick: (Boolean) -> Unit) {
+  BoxWithConstraints(Modifier.fillMaxSize().padding(start = 20.dp, end = 20.dp, top = 84.dp, bottom = 20.dp)) {
+    val landscape = maxWidth > maxHeight
+    val option: @Composable (Boolean, Modifier) -> Unit = { usePhotos, m ->
+      BouncyButton(
+        onClick = {
+          TrainSounds.say(if (usePhotos) "Echte treinen!" else "Tekeningen!")
+          onPick(usePhotos)
+        },
+        modifier = m,
+        color = Color.White,
+        shape = RoundedCornerShape(28.dp),
+      ) {
+        Column(Modifier.fillMaxSize().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+          Box(Modifier.fillMaxWidth().weight(1f).clip(RoundedCornerShape(18.dp)).background(Color(0xFFE1F5FE))) {
+            if (usePhotos) {
+              Image(
+                painterResource(TrainKind.HIGH_SPEED.photos.first().res),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+              )
+            } else {
+              Canvas(Modifier.fillMaxSize().padding(10.dp)) {
+                val len = locoLength(TrainKind.HIGH_SPEED)
+                val u = min(size.height / 14f, size.width / (len + 3f))
+                val railY = size.height * 0.8f
+                drawRails(railY, u)
+                drawTrain(TrainKind.HIGH_SPEED, (size.width - len * u) / 2f, railY, u, cars = 0, time = 0.6f)
+              }
+            }
+          }
+          Spacer(Modifier.height(10.dp))
+          Text(
+            if (usePhotos) "📷 Echte treinen" else "✏️ Tekeningen",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Black,
+            color = Color(0xFF263238),
+          )
+        }
+      }
+    }
+    if (landscape) {
+      Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+        option(false, Modifier.weight(1f).fillMaxHeight())
+        option(true, Modifier.weight(1f).fillMaxHeight())
+      }
+    } else {
+      Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        option(false, Modifier.weight(1f).fillMaxWidth())
+        option(true, Modifier.weight(1f).fillMaxWidth())
       }
     }
   }

@@ -3,14 +3,11 @@ package be.jochem.tiptoptrein.ui.slideshow
 import android.graphics.Color as AndroidColor
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,13 +30,14 @@ import androidx.media3.datasource.RawResourceDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import be.jochem.tiptoptrein.sound.TrainSounds
 import be.jochem.tiptoptrein.trains.Video
 import be.jochem.tiptoptrein.ui.common.EmojiButton
 
-/** Plays a train film full screen. It stops on its own at the end; tap 🔁 to watch it again. */
+/** Plays a train film as soon as it is on screen. It stops on its own at the end; tap 🔁 to watch it again. */
 @OptIn(UnstableApi::class)
 @Composable
-fun VideoOverlay(video: Video, onClose: () -> Unit) {
+fun VideoClip(video: Video, modifier: Modifier = Modifier) {
   val context = LocalContext.current
   val lifecycleOwner = LocalLifecycleOwner.current
   var ended by remember { mutableStateOf(false) }
@@ -54,6 +52,8 @@ fun VideoOverlay(video: Video, onClose: () -> Unit) {
       playWhenReady = true
     }
   }
+  // The film has its own sound, so the voice stops talking.
+  LaunchedEffect(video) { TrainSounds.stopSpeaking() }
   DisposableEffect(player, lifecycleOwner) {
     val listener = object : Player.Listener {
       override fun onPlaybackStateChanged(state: Int) {
@@ -71,13 +71,7 @@ fun VideoOverlay(video: Video, onClose: () -> Unit) {
     }
   }
 
-  Box(
-    Modifier
-      .fillMaxSize()
-      .background(Color.Black)
-      // Swallow taps so they don't reach the slideshow underneath.
-      .clickable(remember { MutableInteractionSource() }, indication = null) {},
-  ) {
+  Box(modifier.background(Color.Black)) {
     AndroidView(
       factory = { ctx ->
         PlayerView(ctx).apply {
@@ -89,14 +83,11 @@ fun VideoOverlay(video: Video, onClose: () -> Unit) {
       },
       modifier = Modifier.fillMaxSize(),
     )
-    Box(Modifier.fillMaxSize().safeDrawingPadding()) {
-      EmojiButton("✖️", onClick = onClose, size = 64.dp, modifier = Modifier.align(Alignment.TopEnd).padding(16.dp))
-      if (ended) {
-        EmojiButton("🔁", onClick = {
-          player.seekTo(0)
-          player.play()
-        }, size = 110.dp, color = Color(0xFFFFC107), modifier = Modifier.align(Alignment.Center))
-      }
+    if (ended) {
+      EmojiButton("🔁", onClick = {
+        player.seekTo(0)
+        player.play()
+      }, size = 110.dp, color = Color(0xFFFFC107), modifier = Modifier.align(Alignment.Center))
     }
   }
 }
