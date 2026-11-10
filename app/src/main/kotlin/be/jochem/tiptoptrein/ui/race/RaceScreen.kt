@@ -1,5 +1,12 @@
 package be.jochem.tiptoptrein.ui.race
 
+import be.jochem.tiptoptrein.trains.cutout
+import androidx.compose.ui.res.imageResource
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.Image
 import android.content.Context
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -96,8 +103,80 @@ private enum class Route(
 
 private enum class Phase { PICK, ROUTE, COUNTDOWN, RACE, DONE }
 
+/** Supersnel: race yourself by tapping, or watch two real trains race at their real speeds. */
 @Composable
 fun RaceScreen(onHome: () -> Unit) {
+  var mode by remember { mutableStateOf<RaceMode?>(null) }
+  when (mode) {
+    null -> GameFrame(title = "Supersnel", onHome = onHome, background = {
+      Canvas(Modifier.fillMaxSize()) {
+        val u = min(size.height / 52f, size.width / 70f)
+        drawScenery(Scenery.COUNTRY, size.height * 0.36f, u)
+      }
+    }) {
+      ChooseRaceMode { mode = it }
+    }
+    RaceMode.TAP -> TapRace(onHome)
+    RaceMode.REAL -> RealTrainRace(onHome)
+  }
+}
+
+enum class RaceMode { TAP, REAL }
+
+@Composable
+private fun ChooseRaceMode(onPick: (RaceMode) -> Unit) {
+  LaunchedEffect(Unit) { TrainSounds.say("Zelf racen, of echte treinen laten racen?") }
+  BoxWithConstraints(Modifier.fillMaxSize().padding(start = 20.dp, end = 20.dp, top = 84.dp, bottom = 20.dp)) {
+    val option: @Composable (RaceMode, Modifier) -> Unit = { m, mod ->
+      BouncyButton(
+        onClick = {
+          TrainSounds.say(if (m == RaceMode.TAP) "Zelf racen!" else "Echte treinen!")
+          onPick(m)
+        },
+        modifier = mod,
+        color = Color.White.copy(alpha = 0.95f),
+        shape = RoundedCornerShape(28.dp),
+      ) {
+        Column(Modifier.fillMaxSize().padding(14.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+          Box(Modifier.fillMaxWidth().weight(1f).clip(RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
+            if (m == RaceMode.REAL) {
+              Image(
+                painterResource(TrainKind.TGV.photos.first().res),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+              )
+            } else {
+              Text("⚡", fontSize = 90.sp)
+            }
+          }
+          Spacer(Modifier.height(10.dp))
+          Text(
+            if (m == RaceMode.TAP) "⚡ Zelf racen" else "📷 Echte treinen",
+            fontSize = 28.sp,
+            fontWeight = FontWeight.Black,
+            color = Color(0xFF263238),
+          )
+        }
+      }
+    }
+    if (maxWidth > maxHeight) {
+      Row(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(24.dp)) {
+        option(RaceMode.TAP, Modifier.weight(1f).fillMaxHeight())
+        option(RaceMode.REAL, Modifier.weight(1f).fillMaxHeight())
+      }
+    } else {
+      Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(24.dp)) {
+        option(RaceMode.TAP, Modifier.weight(1f).fillMaxWidth())
+        option(RaceMode.REAL, Modifier.weight(1f).fillMaxWidth())
+      }
+    }
+  }
+}
+
+/** Race yourself: tap as fast as you can to beat the other train. */
+@Composable
+private fun TapRace(onHome: () -> Unit) {
   val context = LocalContext.current
   val prefs = remember { context.getSharedPreferences(PREFS, Context.MODE_PRIVATE) }
   var phase by remember { mutableStateOf(Phase.PICK) }
@@ -207,6 +286,10 @@ fun RaceScreen(onHome: () -> Unit) {
     round++
   }
 
+  // The real trains, cut out of their photos.
+  val mineImage = mine.cutout?.let { ImageBitmap.imageResource(it) }
+  val rivalImage = rival.cutout?.let { ImageBitmap.imageResource(it) }
+
   GameFrame(
     title = "Supersnel",
     onHome = onHome,
@@ -225,11 +308,11 @@ fun RaceScreen(onHome: () -> Unit) {
         fun screenX(meters: Float) = trainX + FRONT * u + (meters - myPos) * METERS_TO_UNITS * u
         route.tunnels.forEach { drawTunnel(screenX(it.start), screenX(it.endInclusive), route.underSea, u, clock) }
         val lanes = listOf(Triple(laneTop, rival, rivalPos), Triple(laneBottom, mine, myPos))
+        val images = mapOf(rival to rivalImage, mine to mineImage)
         for ((railY, _, _) in lanes) drawRails(railY, u, scroll)
         for ((railY, kind, pos) in lanes) {
           drawFinish(screenX(route.meters), railY, u)
-          val len = trainLength(kind, 1) * u
-          drawTrain(kind, screenX(pos) - len, railY, u, cars = 1, turn = pos * 2f, time = clock)
+          images[kind]?.let { drawRealTrain(it, screenX(pos), railY, u, rumble = phase == Phase.RACE, phase = clock * 40f + railY) }
         }
         if (mySpeed > 180f) speedLines(laneBottom, u, clock)
       }
@@ -341,13 +424,13 @@ private fun PickTrain(onPick: (TrainKind) -> Unit) {
               shape = RoundedCornerShape(24.dp),
             ) {
               Column(Modifier.fillMaxSize().padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Canvas(Modifier.fillMaxWidth().weight(1f)) {
-                  val len = locoLength(kind)
-                  val u = min(size.height / 13f, size.width / (len + 3f))
-                  val railY = size.height * 0.85f
-                  drawRails(railY, u)
-                  drawTrain(kind, (size.width - len * u) / 2f, railY, u, cars = 0)
-                }
+                // The real train, cut out of its photo.
+                Image(
+                  painterResource(kind.cutout ?: kind.photos.first().res),
+                  contentDescription = kind.title,
+                  contentScale = ContentScale.Fit,
+                  modifier = Modifier.fillMaxWidth().weight(1f),
+                )
                 Text(kind.title, fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color(0xFF263238))
               }
             }
@@ -490,7 +573,7 @@ private fun TurboButton(charge: Float, active: Boolean, onPress: () -> Unit, mod
   }
 }
 
-private fun DrawScope.drawFinish(x: Float, railY: Float, u: Float) {
+internal fun DrawScope.drawFinish(x: Float, railY: Float, u: Float) {
   if (x < -5f * u || x > size.width + 5f * u) return
   val sq = 1.2f * u
   for (i in 0..1) for (j in 0..9) {
@@ -502,7 +585,7 @@ private fun DrawScope.drawFinish(x: Float, railY: Float, u: Float) {
   }
 }
 
-private fun DrawScope.speedLines(railY: Float, u: Float, time: Float) {
+internal fun DrawScope.speedLines(railY: Float, u: Float, time: Float) {
   for (k in 0 until 8) {
     val y = railY - (2f + k * 1.4f) * u
     val x = ((k * 173f - time * 2600f) % size.width + size.width) % size.width

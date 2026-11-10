@@ -50,10 +50,10 @@ enum class TrainKind(
     "Desiro", "desiro's",
     "Dit is de Desiro. Hij stopt bij veel kleine stations. Deuren open. Instappen maar!",
     Sfx.HORN, Scenery.COUNTRY, 2,
+    Photo(R.drawable.photo_desiro4, "Foto: Nelso Silva, CC BY-SA 2.0"),
     Photo(R.drawable.photo_desiro, "Foto: Mini1300, CC0"),
     Photo(R.drawable.photo_desiro2, "Foto: RomainDil, CC BY-SA 4.0"),
     Photo(R.drawable.photo_desiro3, "Foto: Nelso Silva, CC BY-SA 2.0"),
-    Photo(R.drawable.photo_desiro4, "Foto: Nelso Silva, CC BY-SA 2.0"),
     Photo(R.drawable.photo_desiro5, "Foto: LouisCartier, CC BY-SA 4.0"),
     Photo(R.drawable.photo_desiro6, "Foto: Trougnouf, CC BY 4.0"),
   ),
@@ -93,9 +93,9 @@ enum class TrainKind(
     "TGV", "TGV's",
     "De TGV komt uit Frankrijk. Een TGV reed ooit bijna zeshonderd kilometer per uur. Dat is een wereldrecord!",
     Sfx.HORN, Scenery.COUNTRY, 2,
+    Photo(R.drawable.photo_tgv3, "Foto: Francisco Welter-Schultes, CC0"),
     Photo(R.drawable.photo_tgv, "Foto: Florian Pépellin, CC BY-SA 4.0"),
     Photo(R.drawable.photo_tgv2, "Foto: Superalbs, CC BY-SA 4.0"),
-    Photo(R.drawable.photo_tgv3, "Foto: Francisco Welter-Schultes, CC0"),
     Photo(R.drawable.photo_tgv4, "Foto: Jon Worth, CC BY-SA 4.0"),
     Photo(R.drawable.photo_tgv5, "Foto: Florianol45, CC BY-SA 4.0"),
     Photo(R.drawable.photo_tgv6, "Foto: Smiley.toerist, CC BY-SA 4.0"),
@@ -155,3 +155,38 @@ val watchableTrains = listOf(
   TrainKind.INTERCITY, TrainKind.SPRINTER, TrainKind.DOUBLE_DECKER,
   TrainKind.HIGH_SPEED, TrainKind.ICE, TrainKind.TGV, TrainKind.MAGLEV,
 )
+
+/**
+ * How fast the real train can go, in km/h: the HLE 18 locomotive and M7 coaches are built for
+ * 200, the Desiro for 160. The Shanghai maglev ran at 431 km/h until 2021 (now 300).
+ */
+val TrainKind.topSpeed: Int
+  get() = when (this) {
+    TrainKind.INTERCITY -> 200
+    TrainKind.SPRINTER -> 160
+    TrainKind.DOUBLE_DECKER -> 200
+    TrainKind.HIGH_SPEED -> 300
+    TrainKind.ICE -> 300
+    TrainKind.TGV -> 320
+    TrainKind.MAGLEV -> 430
+    TrainKind.STEAM -> 120
+    TrainKind.FREIGHT -> 100
+    TrainKind.METRO -> 80
+    TrainKind.TRAM -> 70
+  }
+
+/**
+ * The train cut out of one of its real photos (transparent background, nose to the right), for
+ * racing real trains. Made with macOS Vision subject lifting; some are mirrored to face right.
+ */
+val TrainKind.cutout: Int?
+  @DrawableRes get() = when (this) {
+    TrainKind.INTERCITY -> R.drawable.race_intercity
+    TrainKind.SPRINTER -> R.drawable.race_desiro
+    TrainKind.DOUBLE_DECKER -> R.drawable.race_double_decker
+    TrainKind.HIGH_SPEED -> R.drawable.race_eurostar
+    TrainKind.ICE -> R.drawable.race_ice
+    TrainKind.TGV -> R.drawable.race_tgv
+    TrainKind.MAGLEV -> R.drawable.race_maglev
+    else -> null
+  }
