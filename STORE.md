@@ -24,7 +24,7 @@ gh secret set PLAY_SERVICE_ACCOUNT_JSON < pad/naar/service-account.json
    - Doelgroep: **jonger dan 13** → de app valt onder het [Families-beleid](https://support.google.com/googleplay/android-developer/answer/9893335). Geen reclame, geen gegevensverzameling: dat klopt met deze app.
    - Gegevensveiligheid: "verzamelt of deelt geen gegevens".
    - Inhoudsclassificatie-vragenlijst, advertenties: nee.
-5. **Store-vermelding**: teksten hieronder, icoon `docs/store/icon-512.png`, feature graphic 1024×500 en schermafbeeldingen in `docs/store/screenshots/` (`phone`, `tablet-7`, `tablet-10`).
+5. **Store-vermelding**: teksten hieronder, icoon `docs/store/icon-512.png`, feature graphic `docs/store/feature-graphic.png` (1024×500) en schermafbeeldingen in `docs/store/screenshots/` (`phone`, `tablet-7`, `tablet-10`).
 
 Daarna: elke push naar `main` → nieuwe versie wordt meteen uitgerold op de interne test. Via *Actions → Build and release → Run workflow* kies je een andere track (beta, productie) of status `draft` als een release eerst als concept moet klaarstaan.
 
